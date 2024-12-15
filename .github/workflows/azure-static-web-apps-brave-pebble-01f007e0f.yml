@@ -15,8 +15,9 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     permissions:
-       id-token: write # Дозвіл для авторизації через GitHub Token
-       contents: read  # Доступ до читання репозиторію
+       id-token: write # OIDC дозволяє GitHub автоматично авторизуватися в Azure
+       contents: read
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -25,6 +26,16 @@ jobs:
         uses: Azure/static-web-apps-deploy@v1
         with:
           action: "upload"
-          app_location: "/"          # Коренева папка з HTML
-          api_location: ""           # API не використовується
-          output_location: ""        # Без збірки
+          app_location: "/"           # Шлях до кореневої папки (index.html)
+          api_location: ""            # API не використовується
+          output_location: ""         # Відсутність збірки
+
+  close_pull_request_job:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    name: Close Pull Request Job
+    steps:
+      - name: Close Pull Request
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          action: "close"
